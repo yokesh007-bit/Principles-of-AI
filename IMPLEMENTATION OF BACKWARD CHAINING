@@ -1,0 +1,40 @@
+# Goal-Driven Reasoning: Backward Chaining
+# Knowledge Base: Maps conclusion -> list of alternative rule antecedent lists
+knowledge_base = {
+    "flu": [["cough", "fever"]],
+    "fever": [["sore_throat"]]
+}
+
+# Known initial facts
+facts = {"sore_throat", "cough"}
+
+def backward_chaining(goal, kb, facts, indent=0):
+    """
+    Recursively evaluates if the goal can be satisfied from facts and rules.
+    """
+    prefix = "  " * indent
+    print(f"{prefix}-> Checking subgoal: '{goal}'")
+    
+    # Base Case: Goal is already a known fact
+    if goal in facts:
+        print(f"{prefix}   [OK] '{goal}' is an established fact.")
+        return True
+
+    # Recursive Step: Check rules that conclude this goal
+    if goal in kb:
+        print(f"{prefix}   [RULE] Searching antecedent rules for '{goal}'...")
+        for conditions in kb[goal]:
+            print(f"{prefix}   [EXPAND] Required antecedents: {conditions}")
+            if all(backward_chaining(c, kb, facts, indent + 1) for c in conditions):
+                print(f"{prefix}   [VERIFIED] '{goal}' proved successfully.")
+                return True
+
+    print(f"{prefix}   [FAIL] Cannot prove '{goal}'.")
+    return False
+
+query = "flu"
+print("Knowledge Base Rules:", knowledge_base)
+print("Initial Facts Base  :", facts)
+print(f"\nExecuting Backward Chaining for Target Query: '{query}'")
+result = backward_chaining(query, knowledge_base, facts)
+print(f"\nFinal Result: Query '{query}' Verified = {result}")

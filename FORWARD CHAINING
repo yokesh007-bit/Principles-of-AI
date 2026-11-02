@@ -1,0 +1,41 @@
+# Rule-Based Expert System: Forward Chaining
+# Knowledge Base: Rules in IF-THEN format ([Conditions], Conclusion)
+knowledge_base = [
+    (["cough", "fever"], "flu"),
+    (["sore_throat", "runny_nose"], "cold"),
+    (["sore_throat"], "fever")  # Sore throat implies fever
+]
+
+# Initial observed facts
+facts = {"cough", "sore_throat"}
+
+def forward_chaining(kb, initial_facts):
+    """
+    Performs forward chaining by iteratively inferring new facts from existing facts
+    until no further conclusions can be derived.
+    """
+    current_facts = set(initial_facts)
+    inferred = True
+    iteration = 0
+    print("Initial Known Facts:", current_facts)
+    print("\nInference Steps:")
+
+    while inferred:
+        inferred = False
+        iteration += 1
+        for conditions, conclusion in kb:
+            if all(c in current_facts for c in conditions) and conclusion not in current_facts:
+                current_facts.add(conclusion)
+                print(f"  Iteration {iteration}: Inferred '{conclusion}' from antecedents {conditions}")
+                inferred = True
+    return current_facts
+
+derived_facts = forward_chaining(knowledge_base, facts)
+print("\nFinal Inferred Fact Base:", derived_facts)
+
+if "flu" in derived_facts:
+    print("Diagnosis: The patient is diagnosed with flu.")
+elif "cold" in derived_facts:
+    print("Diagnosis: The patient is diagnosed with cold.")
+else:
+    print("Diagnosis: No conclusive diagnosis could be established.")

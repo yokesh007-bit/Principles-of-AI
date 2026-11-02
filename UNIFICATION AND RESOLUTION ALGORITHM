@@ -1,0 +1,80 @@
+# Unification and Resolution Theorem Prover for First-Order Logic Horn Clauses
+
+def unify(x, y, theta=None):
+    """
+    Finds a Most General Unifier (MGU) theta for expressions x and y.
+    """
+    if theta is None:
+        theta = {}
+    if theta is False:
+        return False
+    elif x == y:
+        return theta
+    elif isinstance(x, str) and x.islower():   # Variable (lowercase)
+        return unify_var(x, y, theta)
+    elif isinstance(y, str) and y.islower():   # Variable (lowercase)
+        return unify_var(y, x, theta)
+    elif isinstance(x, list) and isinstance(y, list) and len(x) == len(y):
+        t = unify(x[0], y[0], theta)
+        return unify(x[1:], y[1:], t)
+    else:
+        return False
+
+def unify_var(var, x, theta):
+    if var in theta:
+        return unify(theta[var], x, theta)
+    elif isinstance(x, str) and x in theta:
+        return unify(var, theta[x], theta)
+    else:
+        new_theta = dict(theta)
+        new_theta[var] = x
+        return new_theta
+
+def apply_subst(theta, term):
+    if isinstance(term, str):
+        return theta.get(term, term)
+    if isinstance(term, list):
+        return [apply_subst(theta, t) for t in term]
+    return term
+
+# Rules defined as Horn Clauses [Head, Body]: Head :- Body
+# e.g., Mortal(x) :- Human(x)
+knowledge_base_rules = [
+    [["Mortal", "x"], ["Human", "x"]]
+]
+
+# Base facts: Human(John)
+knowledge_base_facts = [
+    ["Human", "John"]
+]
+
+def resolution(rules, facts, query, depth=0):
+    indent = "  " * depth
+    print(f"{indent}Resolving Query: {query}")
+    
+    # Direct match in facts
+    for f in facts:
+        if query == f:
+            print(f"{indent}-> Match found in ground facts: {f}")
+            return True
+
+    # Rule resolution via unification
+    for rule in rules:
+        head, body = rule[0], rule[1]
+        theta = unify(head, query, {})
+        if theta is not False:
+            print(f"{indent}-> Unification succeeded with rule head {head}: substitution = {theta}")
+            sub_goal = apply_subst(theta, body)
+            if resolution(rules, facts, sub_goal, depth + 1):
+                return True
+    return False
+
+test_query = ["Mortal", "John"]
+print("Knowledge Base Rules:", knowledge_base_rules)
+print("Knowledge Base Facts:", knowledge_base_facts)
+print(f"Target Query to Prove: {test_query}\n")
+
+proof_success = resolution(knowledge_base_rules, knowledge_base_facts, test_query)
+print(f"\nProof Status: {'Resolved (True)' if proof_success else 'Unresolved (False)'}")
+if proof_success:
+    print("Conclusion  : John is Mortal.")

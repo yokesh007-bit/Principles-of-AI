@@ -1,0 +1,37 @@
+# Depth First Search (DFS) for Graph Traversal (Warehouse Navigation)
+warehouse_graph = {
+    'A': ['B', 'C'],
+    'B': ['D', 'E'],
+    'C': ['F'],
+    'D': [],
+    'E': ['F'],
+    'F': []
+}
+
+def dfs(graph, start, goal, visited=None, path=None):
+    """
+    Performs recursive Depth First Search to find a path from start to goal.
+    """
+    if visited is None:
+        visited = set()
+    if path is None:
+        path = []
+
+    visited.add(start)
+    path.append(start)
+
+    if start == goal:
+        return path
+
+    for neighbor in graph.get(start, []):
+        if neighbor not in visited:
+            result = dfs(graph, neighbor, goal, visited, path[:])
+            if result:
+                return result
+    return None
+
+start_node = 'A'
+goal_node = 'F'
+path_found = dfs(warehouse_graph, start_node, goal_node)
+print("Warehouse Graph Structure:", warehouse_graph)
+print(f"DFS Path from '{start_node}' to '{goal_node}': {path_found}")

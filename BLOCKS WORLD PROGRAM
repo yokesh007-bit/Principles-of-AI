@@ -1,0 +1,65 @@
+class BlocksWorld:
+    """
+    Goal-driven Blocks World planning system.
+    Solves block stacking configurations respecting physical constraints.
+    """
+    def __init__(self, initial_state=None, goal_state=None):
+        self.state = dict(initial_state if initial_state is not None else {
+            "A": "B",      # A is on B
+            "B": "table",  # B is on table
+            "C": "table"   # C is on table
+        })
+        self.goal = dict(goal_state if goal_state is not None else {
+            "A": "B",
+            "B": "C",
+            "C": "table"
+        })
+        self.moves = []
+
+    def is_goal_state(self):
+        return self.state == self.goal
+
+    def get_top_block(self, block):
+        for b, on_b in self.state.items():
+            if on_b == block:
+                return b
+        return None
+
+    def is_clear(self, block):
+        if block == "table":
+            return True
+        return self.get_top_block(block) is None
+
+    def clear_block(self, block):
+        top = self.get_top_block(block)
+        if top is not None:
+            self.clear_block(top)
+            self.move(top, "table")
+
+    def move(self, block, target):
+        if self.state[block] == target:
+            return
+        if not self.is_clear(block):
+            self.clear_block(block)
+        if target != "table" and not self.is_clear(target):
+            self.clear_block(target)
+        print(f"Action: Move block '{block}' from '{self.state[block]}' to '{target}'")
+        self.state[block] = target
+        self.moves.append((block, target))
+
+    def plan_moves(self):
+        print("Initial State:", self.state)
+        print("Target Goal  :", self.goal)
+        print("\nExecuting Plan:")
+        step = 0
+        while not self.is_goal_state() and step < 20:
+            step += 1
+            for block, target in self.goal.items():
+                if self.state[block] != target:
+                    if target == "table" or (self.state.get(target) == self.goal.get(target)):
+                        self.move(block, target)
+        print("\nFinal State Reached:", self.state)
+        print("Goal Successfully Satisfied:", self.is_goal_state())
+
+bw = BlocksWorld()
+bw.plan_moves()

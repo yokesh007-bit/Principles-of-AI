@@ -1,0 +1,47 @@
+import heapq
+
+def a_star(grid, start, goal):
+    """
+    Finds the optimal path in a 2D grid using the A* Search Algorithm.
+    f(n) = g(n) + h(n), where h(n) is the Manhattan distance.
+    """
+    # Priority queue stores: (f_score, g_score, current_node, path)
+    h_start = abs(start[0] - goal[0]) + abs(start[1] - goal[1])
+    pq = [(h_start, 0, start, [start])]
+    visited = set()
+
+    while pq:
+        f, g, pos, path = heapq.heappop(pq)
+        if pos == goal:
+            return path
+        if pos in visited:
+            continue
+        visited.add(pos)
+
+        # 4-directional grid movement: Up, Down, Left, Right
+        for dr, dc in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+            r, c = pos[0] + dr, pos[1] + dc
+            if 0 <= r < len(grid) and 0 <= c < len(grid[0]) and grid[r][c] == 0:
+                if (r, c) not in visited:
+                    new_g = g + 1
+                    h = abs(r - goal[0]) + abs(c - goal[1])
+                    heapq.heappush(pq, (new_g + h, new_g, (r, c), path + [(r, c)]))
+    return None
+
+# Grid representation: 0 = Free cell, 1 = Obstacle
+grid = [
+    [0, 0, 0, 0, 1],
+    [1, 1, 0, 1, 0],
+    [0, 0, 0, 0, 0],
+    [0, 1, 1, 1, 0],
+    [0, 0, 0, 0, 0]
+]
+
+start_pos = (0, 0)
+goal_pos = (4, 4)
+
+optimal_path = a_star(grid, start_pos, goal_pos)
+print("Start Position:", start_pos)
+print("Goal Position :", goal_pos)
+print("Optimal Path Found:", optimal_path)
+print("Total Path Steps  :", len(optimal_path) - 1 if optimal_path else 0)
